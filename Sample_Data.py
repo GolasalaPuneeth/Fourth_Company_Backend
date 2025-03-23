@@ -1,19 +1,34 @@
 base_Asserts = [
     {
         'id': 1,
-        'full_name': "Michael Rodriguez",
-        'designation': "Software Engineer at Google",
-        'comment': "HashTech Info transformed my job search experience! Their resume optimization and mock interview sessions helped me gain confidence and stand out. Within weeks, I secured multiple job offers, including my dream role at Google. Highly recommend their expert guidance!",
+        'full_name': "Aravind Rokkam",
+        'designation': "Software Engineer at Picarro",
+        'comment': "I can't thank HasTech Info enough for helping me land my Software Engineer role at Picarro. The support and guidance I received really made all the difference in preparing me for this opportunity.",
         'image_url': "/static/base_Asserts_images/" 
     },
 
     {
         'id': 2,
-        'full_name': "Emily Thompson",
-        'designation': "Data Analyst at Microsoft",
-        'comment': "I was struggling to get interview calls despite having the right skills. HashTech Info revamped my resume and LinkedIn profile, making me more visible to recruiters. Their job matching and interview coaching gave me the edge I needed to land a role at Microsoft. Thank you for making my career journey seamless!",
+        'full_name': "Surya Mantena",
+        'designation': "Senior Analyst - Data Solutions at Comcast Corporation",
+        'comment': "I'm beyond excited to join Comcast as a Senior Analyst in Data Solutions, and it's all thanks to HasTech Info! The practical training and job placement assistance were key in helping me get to where I am today.",
+        'image_url': "/static/base_Asserts_images/"
+    },
+    {
+        'id': 3,
+        'full_name': "Ritvik Reddy Kandanelly",
+        'designation': "Data Engineer at NYU Health",
+        'comment': "HasTech Info played a huge role in my journey to becoming a Data Engineer at NYU Health. The hands-on training and interview prep were incredibly helpful in securing this job.",
+        'image_url': "/static/base_Asserts_images/"
+    },
+    {
+        'id': 4,
+        'full_name': "Satya Sri Bala",
+        'designation': "Supply Chain Solutions at UPS Supply Chain Solutions",
+        'comment': "I’m so grateful to HasTech Info for helping me land my role with UPS Supply Chain Solutions. Their personalized mentorship and focus on real-world skills gave me the confidence to succeed.",
         'image_url': "/static/base_Asserts_images/"
     }
+
 ]
 
 Domains_Url = [
