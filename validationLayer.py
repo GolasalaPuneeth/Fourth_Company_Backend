@@ -4,7 +4,7 @@ class MailResponse(BaseModel):
     mail_status: bool
     
 class EmailContent(BaseModel):
-    SENDER :EmailStr = "puneeth3sprime@gmail.com"
+    SENDER :EmailStr = "info@hashtechinfo.com"
     RECIPIENT :EmailStr = "info@hashtechinfo.com"
     SUBJECT: str
     BODY_TEXT: str
