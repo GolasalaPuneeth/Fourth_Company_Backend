@@ -1,10 +1,13 @@
-from fastapi import FastAPI,Depends, HTTPException, status
+from fastapi import FastAPI,Depends, HTTPException, status, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from validationLayer import Base_asserts, Domains_url, UserInfo, EmailContent, MailResponse
-from celery_ser import sendMail
+from celery_ser import sendMail,extract_and_convert_to_json
+from clientsService import celery_app
 from toolService import EmailService
+import asyncio
+import tempfile, os
 import Sample_Data
 import uvicorn
 
@@ -30,6 +33,36 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(auth_sche
             headers={"WWW-Authenticate": "Bearer"}
         )
     return credentials.credentials
+
+
+@app.websocket("/ws/result/dev/{task_id}")
+async def websocket_task_status(websocket: WebSocket, task_id: str):
+    await websocket.accept()
+    try:
+        while True:
+            result = celery_app.AsyncResult(task_id)
+            status = result.state
+
+            if status == "PENDING":
+                await websocket.send_json({"status": "Pending"})
+            elif status == "STARTED":
+                await websocket.send_json({"status": "In Progress"})
+            elif status == "SUCCESS":
+                await websocket.send_json({"status": "Completed"})
+                break
+            elif status == "FAILURE":
+                await websocket.send_json({"status": "Failed", "reason": str(result.info)})
+                break
+            else:
+                await websocket.send_json({"status": status})
+
+            await asyncio.sleep(1.5)  # Polling interval
+
+    except WebSocketDisconnect:
+        print(f"Client disconnected from task {task_id}")
+    except Exception as e:
+        await websocket.send_json({"status": "Error", "reason": str(e)})
+        await websocket.close()
 
 
 @app.get("/")
@@ -118,6 +151,29 @@ async def Mail_service(UserInput : UserInfo,token: str = Depends(validate_token)
             detail="SomeThing Went Wrong",
         )
 
+@app.post("/upload/dev")
+async def upload_file(file: UploadFile = File(...)):
+    ext = os.path.splitext(file.filename)[-1].lower()
+    if ext not in [".pdf", ".docx"]:
+        raise HTTPException(status_code=400, detail="Only PDF or DOCX allowed")
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+        content = await file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+    task = extract_and_convert_to_json.delay(tmp_path, ext.lstrip("."))
+    return {"task_id": task.id, "message": "Processing started"}
+    
+@app.get("/result/dev/{task_id}")
+async def get_result(task_id: str):
+    res = celery_app.AsyncResult(task_id)
+    if res.state == "PENDING":
+        return {"status": "Pending"}
+    elif res.state == "SUCCESS":
+        return {"status": "Completed", "data": res.result}
+    elif res.state == "FAILURE":
+        return {"status": "Failed", "reason": str(res.info)}
+    return {"status": res.state}
 
 if __name__=="__main__":
     uvicorn.run(app)
