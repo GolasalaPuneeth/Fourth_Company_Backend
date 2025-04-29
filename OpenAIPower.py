@@ -3,8 +3,6 @@ import os
 import getpass
 from dotenv_vault import load_dotenv
 
-
-
 load_dotenv()
 
 if not os.environ.get("OPENAI_API_KEY"):

@@ -2,7 +2,7 @@ from fastapi import FastAPI,Depends, HTTPException, status, File, UploadFile, We
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from validationLayer import Base_asserts, Domains_url, UserInfo, EmailContent, MailResponse
+from validationLayer import Base_asserts, Domains_url, UserInfo, EmailContent, MailResponse, logger_info, Status
 from celery_ser import sendMail,extract_and_convert_to_json
 from clientsService import celery_app
 from toolService import EmailService
@@ -174,6 +174,31 @@ async def get_result(task_id: str):
     elif res.state == "FAILURE":
         return {"status": "Failed", "reason": str(res.info)}
     return {"status": res.state}
+
+
+@app.post("/logger/{Error_type}")
+async def Logger_Notifier(Error_type:Status,payload:logger_info): #Error :logger_info,
+    if Error_type.value == "INFO":
+        print(payload)
+        return {"Status":True}
+    if Error_type.value == "WARNING":
+        print("its warning")
+        return {"Status":True}
+    if Error_type.value == "CRITICAL":
+        data = EmailContent(SENDER="puneeth3sprime@gmail.com",RECIPIENT="puneeth3sprime@gmail.com",
+                            SUBJECT=f"Error from {payload.Service}",
+                            BODY_TEXT="service Down", BODY_HTML=f"<h1>{payload.Error_info}</h1>")
+        Report = await EmailService(data).EmailFormat()
+        if(sendMail.delay(Report).get()):
+            return  [MailResponse(mail_status = True)]
+        raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="SomeThing Went Wrong",
+            )
+    return {"status": "ok"}
+
+
+
 
 if __name__=="__main__":
     uvicorn.run(app)

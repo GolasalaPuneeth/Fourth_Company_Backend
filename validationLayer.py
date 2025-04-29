@@ -1,4 +1,12 @@
 from pydantic import BaseModel,EmailStr,HttpUrl
+from enum import Enum
+
+
+class Status(Enum):
+    INFO = "INFO"
+    WARNING = "WARNING"
+    CRITICAL = 'CRITICAL'#Critical
+
 
 class MailResponse(BaseModel):
     mail_status: bool
@@ -34,3 +42,7 @@ class UserInfo(BaseModel):
     EMAIL_client: EmailStr
     MESSAGE: str
     SOURCE: str
+
+class logger_info(BaseModel):
+    Service : str
+    Error_info : str
