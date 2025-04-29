@@ -180,13 +180,13 @@ async def get_result(task_id: str):
 @app.post("/logger/{Error_type}")
 async def Logger_Notifier(Error_type:Status,payload:logger_info): #Error :logger_info,
     if Error_type.value == "INFO":
-        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
+        await InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         return {"Status":True}
     if Error_type.value == "WARNING":
-        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
+        await InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         return {"Status":True}
     if Error_type.value == "CRITICAL":
-        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
+        await InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         data = EmailContent(SENDER="puneeth3sprime@gmail.com",RECIPIENT="puneeth3sprime@gmail.com",
                             SUBJECT=f"Error from {payload.Service}",
                             BODY_TEXT="service Down", BODY_HTML=f"<h1>{payload.Error_info}</h1>")
