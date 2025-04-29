@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from validationLayer import Base_asserts, Domains_url, UserInfo, EmailContent, MailResponse, logger_info, Status
 from celery_ser import sendMail,extract_and_convert_to_json
+from DataBase import InsertLogError
 from clientsService import celery_app
 from toolService import EmailService
 import asyncio
@@ -179,12 +180,13 @@ async def get_result(task_id: str):
 @app.post("/logger/{Error_type}")
 async def Logger_Notifier(Error_type:Status,payload:logger_info): #Error :logger_info,
     if Error_type.value == "INFO":
-        print(payload)
+        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         return {"Status":True}
     if Error_type.value == "WARNING":
-        print("its warning")
+        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         return {"Status":True}
     if Error_type.value == "CRITICAL":
+        InsertLogError(Error_type.value,f"{payload.Service} and {payload.Error_info}")
         data = EmailContent(SENDER="puneeth3sprime@gmail.com",RECIPIENT="puneeth3sprime@gmail.com",
                             SUBJECT=f"Error from {payload.Service}",
                             BODY_TEXT="service Down", BODY_HTML=f"<h1>{payload.Error_info}</h1>")
