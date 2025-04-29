@@ -83,11 +83,11 @@ async def get_logs(page: int = 1, per_page: int = 10):
             return None
 
 
-async def main():
+"""async def main():
     x = await(get_logs())
     print(x['records'])
 
-asyncio.run(main())
+asyncio.run(main())"""
             
 
 
