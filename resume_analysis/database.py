@@ -93,4 +93,4 @@ async def get_resume_analysis(task_id: str, db: AsyncSession) -> Optional[Resume
 def init_sync_db():
     Base.metadata.create_all(bind=sync_engine)
 
-init_sync_db()
+#init_sync_db()
