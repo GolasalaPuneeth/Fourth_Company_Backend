@@ -107,6 +107,35 @@ def full_resume_analysis(resume_file_path: str, job_description: str):
             "message": str(e),
             "task_id": full_resume_analysis.request.id
         }
+    
+@celery_app.task(name='tasks.generate_resume')
+def generate_resume(analysis_dict: Dict):
+    # Import here to avoid circular imports
+    from resume_analysis.langchain_test import ResumeAnalyzer
+    from resume_analysis.document_process import generate_resume_from_json
+    import asyncio
+    
+    analyzer = ResumeAnalyzer()
+    result = analyzer.get_structured_resume_data(resume_data=analysis_dict["resume_text"],
+        missing_keywords_data=analysis_dict["analysis_results"],
+        job_description=analysis_dict["job_description"])
+    
+    pdf_result = asyncio.run(generate_resume_from_json(result))
+    
+    if pdf_result:
+        return {
+            "pdf": {
+                "filename": pdf_result["filename"],
+                "pdf_path": pdf_result["pdf_path"],
+                "download_url": pdf_result["download_url"]
+            }
+        }
+    else:
+        return {
+            "status": "error",
+            "result": result,
+            "error_message": "Failed to generate PDF resume"
+        }
 
 
 @celery_app.task(name='tasks.generate_resume_with_keyword')
