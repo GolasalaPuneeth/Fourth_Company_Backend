@@ -16,5 +16,6 @@ aws_secret_access_key=config["aws_secret_access_key"]
 celery_app = Celery(
     "tasks",
     broker=config['broker'], 
-    backend=config['Que_backend']
+    backend=config['Que_backend'],
+    result_expires=300
 )
