@@ -1,6 +1,6 @@
 from fastapi import UploadFile, File, Body, HTTPException, APIRouter,Depends
 from fastapi.responses import JSONResponse, FileResponse
-from resume_analysis.tasks import full_resume_analysis, celery_app, generate_resume_with_keyword
+from resume_analysis.tasks import full_resume_analysis, celery_app, generate_resume, generate_resume_with_keyword
 from celery.result import AsyncResult
 from resume_analysis.database import get_resume_analysis, get_db
 from sqlalchemy.ext.asyncio import AsyncSession
