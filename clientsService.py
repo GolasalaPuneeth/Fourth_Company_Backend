@@ -3,7 +3,6 @@ import os
 from botocore.exceptions import NoCredentialsError, BotoCoreError
 from celery import Celery
 from dotenv import dotenv_values
-import resume_analysis.tasks
 
 config = dotenv_values(".env")
 
