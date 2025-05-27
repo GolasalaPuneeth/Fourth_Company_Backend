@@ -89,3 +89,8 @@ def save_resume_analysis_sync(ResumeData: SaveResumeAnalysis) -> ResumeAnalysis:
 async def get_resume_analysis(task_id: str, db: AsyncSession) -> Optional[ResumeAnalysis]:
     result = await db.execute(select(ResumeAnalysis).where(ResumeAnalysis.id == task_id))
     return result.scalars().first()
+
+def init_sync_db():
+    Base.metadata.create_all(bind=sync_engine)
+
+init_sync_db()
