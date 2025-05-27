@@ -63,51 +63,6 @@ def full_resume_analysis(resume_file_path: str, job_description: str):
         except Exception as cleanup_error:
             print(f"Error removing temporary file {resume_file_path}: {str(cleanup_error)}")
         
-@celery_app.task(name='tasks.full_resume_analysis')
-def full_resume_analysis(resume_file_path: str, job_description: str):
-    try:
-        file_extension = os.path.splitext(resume_file_path)[1].lower()
-
-        async def extract_text():
-            if file_extension == ".pdf":
-                return await extract_text_from_pdf(resume_file_path)
-            elif file_extension in [".docx", ".doc"]:
-                return await extract_text_from_word(resume_file_path)
-            else:
-                raise ValueError(f"Unsupported file format: {file_extension}")
-
-        # Run the async extraction
-        resume_text = asyncio.run(extract_text())
-
-        # Perform analysis
-        analyzer = ResumeAnalyzer()
-        analysis_result = analyzer.get_missing_keywords(resume_text, job_description)
-
-        # Create the data object
-        resume_data = SaveResumeAnalysis(
-            task_id=full_resume_analysis.request.id,
-            resume_text=resume_text,
-            job_description=job_description,
-            analysis_results=analysis_result
-        )
-
-        # Save the analysis results
-        save_resume_analysis_sync(resume_data)
-
-        return {
-            "status": "success",
-            "analysis": analysis_result,
-            "task_id": full_resume_analysis.request.id
-        }
-
-    except Exception as e:
-        # Log error or take appropriate action
-        return {
-            "status": "error",
-            "message": str(e),
-            "task_id": full_resume_analysis.request.id
-        }
-    
 @celery_app.task(name='tasks.generate_resume')
 def generate_resume(analysis_dict: Dict):
     # Import here to avoid circular imports
