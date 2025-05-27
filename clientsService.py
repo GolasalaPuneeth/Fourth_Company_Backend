@@ -19,3 +19,4 @@ celery_app = Celery(
     backend=config['Que_backend'],
     result_expires=300
 )
+celery_app.autodiscover_tasks(['resume_analysis'])

@@ -1,13 +1,17 @@
-from clientsService import celery_app
 import os
-from resume_analysis.database import save_resume_analysis_sync, SaveResumeAnalysis
-from resume_analysis.langchain_test import ResumeAnalyzer
-from resume_analysis.document_process import extract_text_from_pdf, extract_text_from_word
 import asyncio
 from typing import Dict
+from clientsService import celery_app
+from resume_analysis.database import save_resume_analysis_sync, SaveResumeAnalysis
+from resume_analysis.langchain_test import ResumeAnalyzer
+from resume_analysis.document_process import (
+    extract_text_from_pdf,
+    extract_text_from_word,
+    generate_resume_from_json,
+)
 
 
-@celery_app.task(name='tasks.full_resume_analysis')
+@celery_app.task
 def full_resume_analysis(resume_file_path: str, job_description: str):
     try:
         file_extension = os.path.splitext(resume_file_path)[1].lower()
@@ -21,7 +25,6 @@ def full_resume_analysis(resume_file_path: str, job_description: str):
                 raise ValueError(f"Unsupported file format: {file_extension}")
 
         resume_text = asyncio.run(extract_text())
-
         analyzer = ResumeAnalyzer()
         result = analyzer.get_missing_keywords(resume_text, job_description)
 
@@ -38,12 +41,14 @@ def full_resume_analysis(resume_file_path: str, job_description: str):
             "analysis": result,
             "task_id": full_resume_analysis.request.id
         }
+
     except Exception as e:
         return {
             "status": "error",
             "error_type": type(e).__name__,
             "error_message": str(e)
         }
+
     finally:
         try:
             if os.path.exists(resume_file_path):
@@ -52,12 +57,8 @@ def full_resume_analysis(resume_file_path: str, job_description: str):
             print(f"Error removing temporary file {resume_file_path}: {str(cleanup_error)}")
 
 
-@celery_app.task(name='tasks.generate_resume')
+@celery_app.task
 def generate_resume(analysis_dict: Dict):
-    from resume_analysis.langchain_test import ResumeAnalyzer
-    from resume_analysis.document_process import generate_resume_from_json
-    import asyncio
-
     analyzer = ResumeAnalyzer()
     result = analyzer.get_structured_resume_data(
         resume_data=analysis_dict["resume_text"],
@@ -83,12 +84,8 @@ def generate_resume(analysis_dict: Dict):
         }
 
 
-@celery_app.task(name='tasks.generate_resume_with_keyword')
+@celery_app.task
 def generate_resume_with_keyword(resume_file_path: str, missing_keywords: str):
-    from resume_analysis.langchain_test import ResumeAnalyzer
-    from resume_analysis.document_process import extract_text_from_pdf, extract_text_from_word, generate_resume_from_json
-    import asyncio
-
     try:
         file_extension = os.path.splitext(resume_file_path)[1].lower()
 
@@ -121,12 +118,14 @@ def generate_resume_with_keyword(resume_file_path: str, missing_keywords: str):
                 "result": result,
                 "error_message": "Failed to generate PDF resume"
             }
+
     except Exception as e:
         return {
             "status": "error",
             "error_type": type(e).__name__,
             "error_message": str(e)
         }
+
     finally:
         try:
             if os.path.exists(resume_file_path):
