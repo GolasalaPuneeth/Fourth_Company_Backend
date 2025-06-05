@@ -39,8 +39,7 @@ def validate_token(credentials: HTTPAuthorizationCredentials = Depends(auth_sche
     return credentials.credentials
 
 
-@app.websocket("/ws/result/dev/{task_id}")
-async def websocket_task_status(websocket: WebSocket, task_id: str):
+
     await websocket.accept()
     try:
         while True:
