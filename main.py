@@ -7,7 +7,6 @@ from celery_ser import sendMail,extract_and_convert_to_json
 from sqlmodel import select
 from DataBase import InsertLogError
 from clientsService import celery_app
-from resume_builder import ATS_builder
 from toolService import *
 from TMTdb_schemas import *
 import asyncio
@@ -569,7 +568,6 @@ app.include_router(message_router)
 app.include_router(candidate_management_router)
 app.include_router(plans_router)
 app.include_router(subscription_router)
-app.include_router(ATS_builder)
 
 if __name__=="__main__":
     uvicorn.run(app)
